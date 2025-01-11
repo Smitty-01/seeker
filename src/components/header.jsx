@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { SignedIn, SignedOut, UserButton, SignIn } from "@clerk/clerk-react";
+import { useUser } from "@clerk/clerk-react";
 import {
   Briefcase,
   BriefcaseBusiness,
@@ -14,6 +15,7 @@ import Onboarding from "@/pages/onboarding";
 const Header = () => {
   const [showSignIn, setShowSignIn] = useState(false);
   const [search, setSearch] = useSearchParams();
+  const { user } = useUser();
   useEffect(() => {
     if (search.get("sign-in")) {
       setShowSignIn(true);
@@ -39,13 +41,14 @@ const Header = () => {
           </SignedOut>
           <SignedIn>
             {/* ADD  A CONDITION */}
-
-            <Button variant="destructive" className="rounded-full">
-              <PenBox size={20} className="mr-2" />
-              Post a job
-            </Button>
-
-            <Link to="/post-job"></Link>
+            {user?.unsafeMetadata?.role === "recruiter" && (
+              <Link to="/post-job">
+                <Button variant="destructive" className="rounded-full">
+                  <PenBox size={20} className="mr-2" />
+                  Post a job
+                </Button>
+              </Link>
+            )}
             <UserButton
               appearance={{
                 elements: {
