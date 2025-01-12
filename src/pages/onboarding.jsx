@@ -7,25 +7,33 @@ import { useNavigate } from "react-router-dom";
 const Onboarding = () => {
   const navigate = useNavigate();
   const { user, isLoaded } = useUser();
-  const handleRoleSelection = async (role) => {
-    try {
-      // Update the user metadata with the selected role
-      await user.update({ unsafeMetadata: { role } });
 
-      // Navigate to the appropriate page based on the role
+  const handleRoleSelection = async (role) => {
+    if (!user) {
+      console.error("User object is not available.");
+      return;
+    }
+
+    try {
+      await user.update({ unsafeMetadata: { role } });
       navigate(role === "recruiter" ? "/post-job" : "/jobs");
     } catch (err) {
       console.error("Error updating role:", err);
     }
   };
+
   useEffect(() => {
-    if (user.unsafeMetadata.role) {
-      navigate(user.unsafeMetadata.role === "recruiter" ? "/post-job" : "jobs");
+    if (isLoaded && user?.unsafeMetadata?.role) {
+      navigate(
+        user.unsafeMetadata.role === "recruiter" ? "/post-job" : "/jobs"
+      );
     }
-  });
-  if (!isLoaded) {
+  }, [isLoaded, user, navigate]);
+
+  if (!isLoaded || !user) {
     return <BarLoader className="mb-4" width={"100%"} color="#36d7b7" />;
   }
+
   return (
     <div className="flex flex-col items-center justify-center mt-40">
       <h2 className="gradient-title font-extrabold text-7xl sm:text-8xl tracking-tighter">
@@ -37,7 +45,7 @@ const Onboarding = () => {
           className="h-36 text-2xl"
           onClick={() => handleRoleSelection("candidate")}
         >
-          Candidtae
+          Candidate
         </Button>
         <Button
           variant="red"
